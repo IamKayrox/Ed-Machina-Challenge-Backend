@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  db:
+    image: postgres:14.4-alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=sN835RKrLRGgjEie
+      - POSTGRES_DB=edmachina_challenge
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+  back:
+    image: edmachina_challenge_backend
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - DB_URL=postgresql+pg8000://postgres:sN835RKrLRGgjEie@db:5432/edmachina_challenge
+    ports:
+      - 8000:8000
+volumes:
+  db:
+    driver: local
