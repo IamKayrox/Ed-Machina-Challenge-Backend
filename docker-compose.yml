@@ -17,7 +17,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     environment:
-      - DB_URL=postgresql+pg8000://postgres:sN835RKrLRGgjEie@db:5432/edmachina_challenge
+      - DB_URL=postgres:sN835RKrLRGgjEie@db:5432/edmachina_challenge
     ports:
       - 8000:8000
 volumes:
