@@ -23,12 +23,6 @@ class Subject(Base):
 
     inscriptions = relationship("Inscription", back_populates="subject")
 
-class LeadSubjects(Base):
-    __tablename__ = "lead_subjects"
-    
-    owner_id = Column(Integer, ForeignKey("leads.id"), primary_key=True)
-    subject_id = Column(Integer, ForeignKey("subjects.id"), primary_key=True)
-
 class Inscription(Base):
     __tablename__ = "inscriptions"
 

@@ -26,13 +26,13 @@ async def create_lead(lead: LeadBase, db: Session = Depends(get_db)):
     return new_lead
 
 @router.get("/{lead_id}", response_model=LeadSchema)
-async def get_lead(lead_id: str, db: Session = Depends(get_db)):
+async def get_lead(lead_id: int, db: Session = Depends(get_db)):
     db_lead = db.query(Lead).filter(Lead.id == lead_id).one()
     return db_lead
 
 @router.patch("/{lead_id}", response_model=LeadSchema)
-async def update_lead(lead: LeadPatch, db: Session = Depends(get_db)):
-    current_lead = db.query(Lead).filter(Lead.id == lead.id).one()
+async def update_lead(lead_id: int, lead: LeadPatch, db: Session = Depends(get_db)):
+    current_lead = db.query(Lead).filter(Lead.id == lead_id).one()
     update_data = lead.dict(exclude_unset=True)
     for key, value in update_data.items():
         setattr(current_lead, key, value)
