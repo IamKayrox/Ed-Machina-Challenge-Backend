@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..models import Lead, Inscription
+
 from ..schemas import LeadSchema, LeadBase, LeadPatch
 from ..database import get_db
+from ..services import leads as service
 
 router = APIRouter(
     prefix="/leads",
@@ -11,39 +12,29 @@ router = APIRouter(
 
 @router.get("/", response_model=list[LeadSchema])
 async def get_all_leads(db: Session = Depends(get_db)):
-    db_lead = db.query(Lead).all()
+    db_lead = service.get_all(db)
+    return db_lead
+
+@router.get("/{lead_id}", response_model=LeadSchema)
+async def get_lead(lead_id: int, db: Session = Depends(get_db)):
+    db_lead = service.get_one_by_id(db, lead_id)
     return db_lead
 
 @router.post("/", response_model=LeadSchema)
 async def create_lead(lead: LeadBase, db: Session = Depends(get_db)):
-    existing_lead = db.query(Lead).filter(Lead.email == lead.email).one_or_none()
+    existing_lead = service.get_one_by_email(lead.email)
     if existing_lead:
         raise HTTPException(status_code=400, detail="El email ya se encuentra en uso")
-    new_lead = Lead(**lead.dict())
-    db.add(new_lead)
-    db.commit()
-    db.refresh(new_lead)
+    new_lead = service.create_one
     return new_lead
-
-@router.get("/{lead_id}", response_model=LeadSchema)
-async def get_lead(lead_id: int, db: Session = Depends(get_db)):
-    db_lead = db.query(Lead).filter(Lead.id == lead_id).one()
-    return db_lead
 
 @router.patch("/{lead_id}", response_model=LeadSchema)
 async def update_lead(lead_id: int, lead: LeadPatch, db: Session = Depends(get_db)):
-    current_lead = db.query(Lead).filter(Lead.id == lead_id).one()
-    update_data = lead.dict(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(current_lead, key, value)
-    db.add(current_lead)
-    db.commit()
-    db.refresh(current_lead)
-    return current_lead
+    current_lead = service.get_one_by_id(lead_id)
+    updated = service.update_one(db, lead, current_lead)
+    return updated
 
 @router.delete("/{lead_id}", response_model=str)
 async def delete_lead(lead_id: int, db: Session = Depends(get_db)):
-    db.query(Lead).filter(Lead.id == lead_id).delete()
-    db.query(Inscription).filter(Inscription.owner_id == lead_id).delete()
-    db.commit()
+    service.delete_one(db, lead_id)
     return 'SUCCESS'
