@@ -11,3 +11,10 @@ Por default la aplicación utiliza sqlite a menos que se especifique la ruta a u
 ```
 {username}:{password}@{url}/{databasename}
 ```
+
+También es posible utilizar docker:
+
+```
+docker build -t edmachina_challenge_backend ./
+docker compose up -d
+```
